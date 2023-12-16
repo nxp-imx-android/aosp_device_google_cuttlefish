@@ -140,6 +140,7 @@ cvd_host_tools = [
     "casimir",
     "snapshot_util_cvd",
     "run_cvd",
+    "screen_recording_server",
     "secure_env",
     "sefcontext_compile",
     "cvd_send_sms",
@@ -159,6 +160,7 @@ cvd_host_tools = [
     "wmediumd_gen_config",
     "vulkan.pastel",
     "automotive_vsock_proxy",
+    "vhost_device_vsock",
 ]
 
 cvd_openwrt_images = [
@@ -184,6 +186,7 @@ cvd_host_webrtc_assets = [
     "webrtc_client.html",
     "webrtc_rootcanal.js",
     "webrtc_location.js",
+    "webrtc_touch.js",
     "webrtc_server.crt",
     "webrtc_server.key",
     "webrtc_server.p12",

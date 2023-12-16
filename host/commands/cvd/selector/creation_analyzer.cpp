@@ -34,7 +34,6 @@
 #include "host/commands/cvd/common_utils.h"
 #include "host/commands/cvd/selector/instance_database_utils.h"
 #include "host/commands/cvd/selector/selector_constants.h"
-#include "host/libs/config/cuttlefish_config.h"
 
 namespace cuttlefish {
 namespace selector {
@@ -183,7 +182,7 @@ CreationAnalyzer::AnalyzeInstanceIdsInternal() {
   }
   auto unused_id_pool =
       CF_EXPECT(CollectUnusedIds(instance_database_, std::move(id_pool)));
-  auto unique_id_allocator = std::move(IdAllocator::New(unused_id_pool));
+  auto unique_id_allocator = IdAllocator::New(unused_id_pool);
   CF_EXPECT(unique_id_allocator != nullptr,
             "Memory allocation for UniqueResourceAllocator failed.");
 
@@ -251,7 +250,7 @@ static Result<std::vector<std::string>> UpdateInstanceArgs(
       GflagsCompatFlag("num_instances", old_num_instances),
       GflagsCompatFlag("base_instance_num", old_base_instance_num)};
   // discard old ones
-  ParseFlags(instance_id_flags, new_args);
+  CF_EXPECT(ParseFlags(instance_id_flags, new_args));
 
   auto max = *(std::max_element(ids.cbegin(), ids.cend()));
   auto min = *(std::min_element(ids.cbegin(), ids.cend()));

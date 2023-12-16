@@ -84,9 +84,6 @@ class InstanceManager {
   void RemoveInstanceGroup(const uid_t uid, const std::string&);
 
   cvd::Status CvdClear(const SharedFD& out, const SharedFD& err);
-  Result<cvd::Status> CvdFleet(const uid_t uid, const SharedFD& out,
-                               const SharedFD& err,
-                               const std::vector<std::string>& fleet_cmd_args);
   static Result<std::string> GetCuttlefishConfigPath(const std::string& home);
 
   Result<std::optional<InstanceLockFile>> TryAcquireLock(int instance_num);
@@ -106,12 +103,18 @@ class InstanceManager {
                                        const Queries& queries) const;
   Result<Json::Value> Serialize(const uid_t uid);
   Result<void> LoadFromJson(const uid_t uid, const Json::Value&);
+  std::vector<std::string> AllGroupNames(uid_t uid) const;
+
+  struct UserGroupSelectionSummary {
+    // Index to group name. This is the index printed in the menu
+    // This field offers mapping between the number/index the user
+    // selects and the group that is to be chosen
+    std::unordered_map<int, std::string> idx_to_group_name;
+    std::string menu;
+  };
+  Result<UserGroupSelectionSummary> GroupSummaryMenu(uid_t uid) const;
 
  private:
-  Result<cvd::Status> CvdFleetImpl(const uid_t uid, const SharedFD& out,
-                                   const SharedFD& err);
-  Result<Json::Value> IssueStatusCommand(
-      const selector::LocalInstanceGroup& group, const SharedFD& err);
   Result<void> IssueStopCommand(const SharedFD& out, const SharedFD& err,
                                 const std::string& config_file_path,
                                 const selector::LocalInstanceGroup& group);

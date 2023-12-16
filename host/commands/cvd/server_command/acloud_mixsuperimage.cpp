@@ -30,7 +30,7 @@
 #include "host/commands/cvd/server_command/server_handler.h"
 #include "host/commands/cvd/server_command/utils.h"
 #include "host/commands/cvd/types.h"
-#include "host/libs/config/cuttlefish_config.h"
+#include "host/libs/config/config_utils.h"
 
 namespace cuttlefish {
 
@@ -242,8 +242,8 @@ class AcloudMixSuperImageCommand : public CvdServerHandler {
 
     TemporaryFile new_misc_info;
     std::string new_misc_info_path = new_misc_info.path;
-    _RewriteMiscInfo(new_misc_info_path, misc_info_path, lpmake_binary,
-                     get_image);
+    CF_EXPECT(_RewriteMiscInfo(new_misc_info_path, misc_info_path,
+                               lpmake_binary, get_image));
 
     Command command(build_super_image_binary);
     command.AddParameter(new_misc_info_path);
@@ -252,7 +252,7 @@ class AcloudMixSuperImageCommand : public CvdServerHandler {
     auto subprocess = command.Start(options);
     CF_EXPECT(subprocess.Started());
     CF_EXPECT(waiter_.Setup(std::move(subprocess)));
-    callback_unlock();
+    CF_EXPECT(callback_unlock());
     CF_EXPECT(waiter_.Wait());
     return {};
   }

@@ -43,6 +43,10 @@ Result<std::optional<MonitorCommand>> UwbConnector(
 
 std::optional<MonitorCommand> AutomotiveProxyService(const CuttlefishConfig&);
 
+fruit::Component<fruit::Required<const CuttlefishConfig, LogTeeCreator,
+                                 const CuttlefishConfig::InstanceSpecific>>
+VhostDeviceVsockComponent();
+
 Result<std::optional<MonitorCommand>> BluetoothConnector(
     const CuttlefishConfig&, const CuttlefishConfig::InstanceSpecific&);
 
@@ -105,6 +109,8 @@ fruit::Component<fruit::Required<const CuttlefishConfig,
                                  const CuttlefishConfig::InstanceSpecific>>
 NetsimServerComponent();
 
+Result<std::optional<MonitorCommand>> ScreenRecordingServer(GrpcSocketCreator&);
+
 Result<MonitorCommand> SecureEnv(const CuttlefishConfig&,
                                  const CuttlefishConfig::InstanceSpecific&,
                                  AutoSecureEnvFiles::Type&,
@@ -128,4 +134,9 @@ fruit::Component<
 launchStreamerComponent();
 
 fruit::Component<WebRtcRecorder> WebRtcRecorderComponent();
+
+fruit::Component<
+    fruit::Required<const CuttlefishConfig,
+                    const CuttlefishConfig::InstanceSpecific, LogTeeCreator>>
+McuComponent();
 }  // namespace cuttlefish

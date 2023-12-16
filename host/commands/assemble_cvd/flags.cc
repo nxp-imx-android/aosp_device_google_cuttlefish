@@ -27,6 +27,7 @@
 #include <sstream>
 #include <unordered_map>
 
+#include <android-base/file.h>
 #include <android-base/logging.h>
 #include <android-base/parseint.h>
 #include <android-base/strings.h>
@@ -41,6 +42,7 @@
 #include "common/libs/utils/contains.h"
 #include "common/libs/utils/files.h"
 #include "common/libs/utils/flag_parser.h"
+#include "common/libs/utils/json.h"
 #include "common/libs/utils/network.h"
 #include "host/commands/assemble_cvd/alloc.h"
 #include "host/commands/assemble_cvd/boot_config.h"
@@ -51,6 +53,8 @@
 #include "host/commands/assemble_cvd/graphics_flags.h"
 #include "host/commands/assemble_cvd/misc_info.h"
 #include "host/commands/assemble_cvd/touchpad.h"
+#include "host/commands/cvd/parser/load_configs_parser.h"
+#include "host/libs/config/config_flag.h"
 #include "host/libs/config/cuttlefish_config.h"
 #include "host/libs/config/display.h"
 #include "host/libs/config/esp.h"
@@ -353,6 +357,9 @@ DEFINE_vec(enable_kernel_log, fmt::format("{}", CF_DEFAULTS_ENABLE_KERNEL_LOG),
 DEFINE_vec(vhost_net, fmt::format("{}", CF_DEFAULTS_VHOST_NET),
            "Enable vhost acceleration of networking");
 
+DEFINE_vec(vhost_user_vsock, fmt::format("{}", CF_DEFAULTS_VHOST_USER_VSOCK),
+           "Enable vhost-user-vsock");
+
 DEFINE_string(
     vhost_user_mac80211_hwsim, CF_DEFAULTS_VHOST_USER_MAC80211_HWSIM,
     "Unix socket path for vhost-user of mac80211_hwsim, typically served by "
@@ -450,6 +457,10 @@ DEFINE_vec(device_external_network, CF_DEFAULTS_DEVICE_EXTERNAL_NETWORK,
 DEFINE_bool(snapshot_compatible, false,
             "Declaring that device is snapshot'able and runs with only "
             "supported ones.");
+
+DEFINE_vec(mcu_config_path, CF_DEFAULTS_MCU_CONFIG_PATH,
+           "configuration file for the MCU emulator");
+
 
 DECLARE_string(assembly_dir);
 DECLARE_string(boot_image);
@@ -889,6 +900,9 @@ Result<CuttlefishConfig> InitializeCuttlefishConfiguration(
 
   tmp_config_obj.set_root_dir(root_dir);
 
+  auto instance_nums =
+      CF_EXPECT(InstanceNumsCalculator().FromGlobalGflags().Calculate());
+
   // TODO(weihsu), b/250988697:
   // FLAGS_vm_manager used too early, have to handle this vectorized string early
   // Currently, all instances should use same vmm, added checking here
@@ -898,6 +912,10 @@ Result<CuttlefishConfig> InitializeCuttlefishConfiguration(
     CF_EXPECT(
         vm_manager_vec[0] == vm_manager_vec[i],
         "All instances should have same vm_manager, " << FLAGS_vm_manager);
+  }
+  CF_EXPECT_GT(vm_manager_vec.size(), 0);
+  while (vm_manager_vec.size() < instance_nums.size()) {
+    vm_manager_vec.emplace_back(vm_manager_vec[0]);
   }
 
   // TODO(weihsu), b/250988697: moved bootconfig_supported and hctr2_supported
@@ -980,9 +998,6 @@ Result<CuttlefishConfig> InitializeCuttlefishConfiguration(
 
   tmp_config_obj.set_enable_automotive_proxy(FLAGS_enable_automotive_proxy);
 
-  auto instance_nums =
-      CF_EXPECT(InstanceNumsCalculator().FromGlobalGflags().Calculate());
-
   // get flag default values and store into map
   auto name_to_default_value = CurrentFlagsToDefaultValue();
   // old flags but vectorized for multi-device instances
@@ -1054,6 +1069,8 @@ Result<CuttlefishConfig> InitializeCuttlefishConfiguration(
       CF_EXPECT(GET_FLAG_STR_VALUE(udp_port_range));
   std::vector<bool> vhost_net_vec = CF_EXPECT(GET_FLAG_BOOL_VALUE(
       vhost_net));
+  std::vector<bool> vhost_user_vsock_vec =
+      CF_EXPECT(GET_FLAG_BOOL_VALUE(vhost_user_vsock));
   std::vector<std::string> ril_dns_vec =
       CF_EXPECT(GET_FLAG_STR_VALUE(ril_dns));
 
@@ -1109,6 +1126,8 @@ Result<CuttlefishConfig> InitializeCuttlefishConfiguration(
                                                    !restore_from_snapshot);
   std::vector<std::string> device_external_network_vec =
       CF_EXPECT(GET_FLAG_STR_VALUE(device_external_network));
+
+  std::vector<std::string> mcu_config_vec = CF_EXPECT(GET_FLAG_STR_VALUE(mcu_config_path));
 
   std::string default_enable_sandbox = "";
   std::string default_enable_virtiofs = "";
@@ -1249,6 +1268,15 @@ Result<CuttlefishConfig> InitializeCuttlefishConfiguration(
     instance.set_ril_dns(ril_dns_vec[instance_index]);
 
     instance.set_vhost_net(vhost_net_vec[instance_index]);
+
+    if (vhost_user_vsock_vec[instance_index] &&
+        tmp_config_obj.vm_manager() != CrosvmManager::name()) {
+      LOG(WARNING) << "vhost_user_vsock is available only in crosvm.";
+      instance.set_vhost_user_vsock(false);
+    } else {
+      instance.set_vhost_user_vsock(vhost_user_vsock_vec[instance_index]);
+    }
+
     // end of wifi, bluetooth, connectivity setup
 
     if (use_random_serial_vec[instance_index]) {
@@ -1333,7 +1361,8 @@ Result<CuttlefishConfig> InitializeCuttlefishConfiguration(
 
     instance.set_memory_mb(memory_mb_vec[instance_index]);
     instance.set_ddr_mem_mb(memory_mb_vec[instance_index] * 1.2);
-    instance.set_setupwizard_mode(setupwizard_mode_vec[instance_index]);
+    CF_EXPECT(
+        instance.set_setupwizard_mode(setupwizard_mode_vec[instance_index]));
     instance.set_userdata_format(userdata_format_vec[instance_index]);
     instance.set_guest_enforce_security(guest_enforce_security_vec[instance_index]);
     instance.set_pause_in_bootloader(pause_in_bootloader_vec[instance_index]);
@@ -1599,6 +1628,17 @@ Result<CuttlefishConfig> InitializeCuttlefishConfiguration(
               "TODO(b/286284441): slirp only works on QEMU");
     instance.set_external_network_mode(external_network_mode);
 
+    if (!mcu_config_vec[instance_index].empty()) {
+      auto mcu_cfg_path = mcu_config_vec[instance_index];
+      CF_EXPECT(FileExists(mcu_cfg_path), "MCU config file does not exist");
+      std::string file_content;
+      using android::base::ReadFileToString;
+      CF_EXPECT(ReadFileToString(mcu_cfg_path.c_str(), &file_content,
+                                 /* follow_symlinks */ true),
+                "Failed to read mcu config file");
+      instance.set_mcu(CF_EXPECT(ParseJson(file_content), "Failed parsing JSON file"));
+    }
+
     instance_index++;
   }  // end of num_instances loop
 
@@ -1647,7 +1687,7 @@ Result<CuttlefishConfig> InitializeCuttlefishConfiguration(
                 calculated_gpu_mode_vec),
             "The set of flags is incompatible with snapshot");
 
-  DiskImageFlagsVectorization(tmp_config_obj, fetcher_config);
+  CF_EXPECT(DiskImageFlagsVectorization(tmp_config_obj, fetcher_config));
 
   return tmp_config_obj;
 }
@@ -1777,6 +1817,14 @@ void SetDefaultFlagsForGem5() {
   SetCommandLineOptionWithMode("cpus", "1", SET_FLAGS_DEFAULT);
 }
 
+void SetDefaultFlagsForMcu() {
+  auto path = DefaultHostArtifactsPath("etc/mcu_config.json");
+  if (!CanAccess(path, R_OK)) {
+    return;
+  }
+  SetCommandLineOptionWithMode("mcu_config_path", path.c_str(), SET_FLAGS_DEFAULT);
+}
+
 void SetDefaultFlagsForOpenwrt(Arch target_arch) {
   if (target_arch == Arch::X86_64) {
     SetCommandLineOptionWithMode(
@@ -1874,6 +1922,8 @@ Result<std::vector<GuestConfig>> GetGuestConfigAndSetDefaults() {
   }
 
   SetDefaultFlagsForOpenwrt(guest_configs[0].target_arch);
+
+  SetDefaultFlagsForMcu();
 
   // Set the env variable to empty (in case the caller passed a value for it).
   unsetenv(kCuttlefishConfigEnvVarName);
