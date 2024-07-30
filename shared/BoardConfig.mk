@@ -338,6 +338,9 @@ BOARD_KERNEL_CMDLINE += firmware_class.path=/vendor/etc/
 BOARD_KERNEL_CMDLINE += loop.max_part=7
 BOARD_KERNEL_CMDLINE += init=/init
 
+BOARD_KERNEL_CMDLINE += androidboot.boot_device=51712
+BOARD_KERNEL_CMDLINE += androidboot.fstab_name=fstab androidboot.fstab_suffix=trout
+
 # Enable KUnit for userdebug and eng builds
 ifneq (,$(filter userdebug eng, $(TARGET_BUILD_VARIANT)))
   BOARD_KERNEL_CMDLINE += kunit.enable=1
