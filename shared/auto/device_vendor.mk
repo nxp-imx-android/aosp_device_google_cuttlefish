@@ -36,9 +36,9 @@ BOARD_SEPOLICY_DIRS += device/google/cuttlefish/shared/auto/sepolicy \
 ################################################
 # Begin general Android Auto Embedded configurations
 
-PRODUCT_COPY_FILES += \
-    packages/services/Car/car_product/init/init.bootstat.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.bootstat.rc \
-    packages/services/Car/car_product/init/init.car.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.car.rc
+#PRODUCT_COPY_FILES += \
+#    packages/services/Car/car_product/init/init.bootstat.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.bootstat.rc \
+#    packages/services/Car/car_product/init/init.car.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.car.rc
 
 ifneq ($(LOCAL_SENSOR_FILE_OVERRIDES),true)
     PRODUCT_COPY_FILES += \
@@ -57,7 +57,7 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.software.activities_on_secondary_displays.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.activities_on_secondary_displays.xml \
 
 # Preinstalled packages per user type
-PRODUCT_COPY_FILES += \
+#PRODUCT_COPY_FILES += \
     device/google/cuttlefish/shared/auto/preinstalled-packages-product-car-cuttlefish.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/sysconfig/preinstalled-packages-product-car-cuttlefish.xml
 
 ifndef LOCAL_AUDIO_PRODUCT_COPY_FILES
@@ -71,24 +71,24 @@ LOCAL_AUDIO_PRODUCT_COPY_FILES += \
 endif
 
 # Include display settings for an auto device.
-PRODUCT_COPY_FILES += \
-    device/google/cuttlefish/shared/auto/display_settings.xml:$(TARGET_COPY_OUT_VENDOR)/etc/display_settings.xml
+#PRODUCT_COPY_FILES += \
+#    device/google/cuttlefish/shared/auto/display_settings.xml:$(TARGET_COPY_OUT_VENDOR)/etc/display_settings.xml
 
 # vehicle HAL
-ifeq ($(LOCAL_VHAL_PRODUCT_PACKAGE),)
-    LOCAL_VHAL_PRODUCT_PACKAGE := android.hardware.automotive.vehicle@V3-emulator-service
-    BOARD_SEPOLICY_DIRS += device/google/cuttlefish/shared/auto/sepolicy/vhal
-endif
-PRODUCT_PACKAGES += $(LOCAL_VHAL_PRODUCT_PACKAGE)
-
-# Remote access HAL
-PRODUCT_PACKAGES += android.hardware.automotive.remoteaccess@V2-default-service
-
-# Broadcast Radio
-PRODUCT_PACKAGES += android.hardware.broadcastradio-service.default
-
-# IVN HAL
-PRODUCT_PACKAGES += android.hardware.automotive.ivn@V1-default-service
+#ifeq ($(LOCAL_VHAL_PRODUCT_PACKAGE),)
+#    LOCAL_VHAL_PRODUCT_PACKAGE := android.hardware.automotive.vehicle@V3-emulator-service
+#    BOARD_SEPOLICY_DIRS += device/google/cuttlefish/shared/auto/sepolicy/vhal
+#endif
+#PRODUCT_PACKAGES += $(LOCAL_VHAL_PRODUCT_PACKAGE)
+#
+## Remote access HAL
+#PRODUCT_PACKAGES += android.hardware.automotive.remoteaccess@V2-default-service
+#
+## Broadcast Radio
+#PRODUCT_PACKAGES += android.hardware.broadcastradio-service.default
+#
+## IVN HAL
+#PRODUCT_PACKAGES += android.hardware.automotive.ivn@V1-default-service
 
 # AudioControl HAL
 ifeq ($(LOCAL_AUDIOCONTROL_HAL_PRODUCT_PACKAGE),)
@@ -98,7 +98,7 @@ endif
 PRODUCT_PACKAGES += $(LOCAL_AUDIOCONTROL_HAL_PRODUCT_PACKAGE)
 
 # CAN bus HAL
-PRODUCT_PACKAGES += android.hardware.automotive.can-service
+#PRODUCT_PACKAGES += android.hardware.automotive.can-service
 
 # MACSEC HAL
 PRODUCT_PACKAGES += android.hardware.macsec-service
@@ -119,11 +119,11 @@ BOARD_SEPOLICY_DIRS += packages/services/Car/car_product/occupant_awareness/sepo
 # you can configure EvsManager to use your EVS HAL implementation.  Similarly, please set
 # ENABLE_SAMPLE_EVS_APP as false if you want to use your own EVS app configuration or own EVS
 # app implementation.
-ENABLE_EVS_SERVICE ?= true
-ENABLE_MOCK_EVSHAL ?= true
-ENABLE_CAREVSSERVICE_SAMPLE ?= true
-ENABLE_SAMPLE_EVS_APP ?= true
-ENABLE_CARTELEMETRY_SERVICE ?= true
+#ENABLE_EVS_SERVICE ?= true
+#ENABLE_MOCK_EVSHAL ?= true
+#ENABLE_CAREVSSERVICE_SAMPLE ?= true
+#ENABLE_SAMPLE_EVS_APP ?= true
+#ENABLE_CARTELEMETRY_SERVICE ?= true
 
 ifeq ($(ENABLE_MOCK_EVSHAL), true)
 CUSTOMIZE_EVS_SERVICE_PARAMETER := true
@@ -139,12 +139,12 @@ PRODUCT_COPY_FILES += \
     device/google/cuttlefish/shared/auto/evs/evs_app_config.json:$(TARGET_COPY_OUT_VENDOR)/etc/automotive/evs/config_override.json
 endif
 
-BOARD_IS_AUTOMOTIVE := true
+#BOARD_IS_AUTOMOTIVE := true
 
 DEVICE_PACKAGE_OVERLAYS += device/google/cuttlefish/shared/auto/overlay
 
-PRODUCT_PACKAGES += CarServiceOverlayCuttleFish
-GOOGLE_CAR_SERVICE_OVERLAY += CarServiceOverlayCuttleFishGoogle
+#PRODUCT_PACKAGES += CarServiceOverlayCuttleFish
+#GOOGLE_CAR_SERVICE_OVERLAY += CarServiceOverlayCuttleFishGoogle
 
 PRODUCT_PACKAGES += ConnectivityOverlayCuttleFish
 GOOGLE_CAR_SERVICE_OVERLAY += ConnectivityOverlayCuttleFishGoogle
