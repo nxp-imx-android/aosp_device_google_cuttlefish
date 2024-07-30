@@ -340,39 +340,45 @@ endif
 #
 # Confirmation UI HAL
 #
-ifeq ($(LOCAL_CONFIRMATIONUI_PRODUCT_PACKAGE),)
-    LOCAL_CONFIRMATIONUI_PRODUCT_PACKAGE := com.google.cf.confirmationui
-endif
-PRODUCT_PACKAGES += $(LOCAL_CONFIRMATIONUI_PRODUCT_PACKAGE)
+#ifeq ($(LOCAL_CONFIRMATIONUI_PRODUCT_PACKAGE),)
+#    LOCAL_CONFIRMATIONUI_PRODUCT_PACKAGE := com.google.cf.confirmationui
+#endif
+#PRODUCT_PACKAGES += $(LOCAL_CONFIRMATIONUI_PRODUCT_PACKAGE)
 
 #
 # Dumpstate HAL
 #
-ifeq ($(LOCAL_DUMPSTATE_PRODUCT_PACKAGE),)
-    LOCAL_DUMPSTATE_PRODUCT_PACKAGE += com.android.hardware.dumpstate
-endif
+LOCAL_DUMPSTATE_PRODUCT_PACKAGE := android.hardware.dumpstate-service.example
+#ifeq ($(LOCAL_DUMPSTATE_PRODUCT_PACKAGE),)
+#    LOCAL_DUMPSTATE_PRODUCT_PACKAGE += com.android.hardware.dumpstate
+#endif
 PRODUCT_PACKAGES += $(LOCAL_DUMPSTATE_PRODUCT_PACKAGE)
 
 #
 # Gatekeeper
 #
-PRODUCT_PACKAGES += \
+LOCAL_GATEKEEPER_PRODUCT_PACKAGE := android.hardware.gatekeeper@1.0-service.software
+#ifeq ($(LOCAL_GATEKEEPER_PRODUCT_PACKAGE),)
+#    LOCAL_GATEKEEPER_PRODUCT_PACKAGE := com.google.cf.gatekeeper
+#endif
+#PRODUCT_PACKAGES += \
   com.android.hardware.gatekeeper.cf_remote \
   com.android.hardware.gatekeeper.nonsecure \
 
 #
 # Oemlock
 #
-LOCAL_ENABLE_OEMLOCK ?= true
-ifeq ($(LOCAL_ENABLE_OEMLOCK),true)
-ifeq ($(LOCAL_OEMLOCK_PRODUCT_PACKAGE),)
-    LOCAL_OEMLOCK_PRODUCT_PACKAGE := com.google.cf.oemlock
-endif
-PRODUCT_PACKAGES += \
-    $(LOCAL_OEMLOCK_PRODUCT_PACKAGE)
-
-PRODUCT_VENDOR_PROPERTIES += ro.oem_unlock_supported=1
-endif
+#LOCAL_OEMLOCK_PRODUCT_PACKAGE := android.hardware.oemlock-service.example
+#LOCAL_ENABLE_OEMLOCK ?= true
+#ifeq ($(LOCAL_ENABLE_OEMLOCK),true)
+#ifeq ($(LOCAL_OEMLOCK_PRODUCT_PACKAGE),)
+#    LOCAL_OEMLOCK_PRODUCT_PACKAGE := com.google.cf.oemlock
+#endif
+#PRODUCT_PACKAGES += \
+#    $(LOCAL_OEMLOCK_PRODUCT_PACKAGE)
+#
+#PRODUCT_VENDOR_PROPERTIES += ro.oem_unlock_supported=1
+#endif
 
 # Health
 ifeq ($(LOCAL_HEALTH_PRODUCT_PACKAGE),)
