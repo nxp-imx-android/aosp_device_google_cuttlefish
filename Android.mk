@@ -48,11 +48,11 @@ $(eval $(call declare-1p-copy-files,hardware/google/camera/devices,.json))
 ifneq ($(filter vsoc_arm vsoc_arm64 vsoc_riscv64 vsoc_x86 vsoc_x86_64, $(TARGET_BOARD_PLATFORM)),)
 LOCAL_PATH:= $(call my-dir)
 
-include $(CLEAR_VARS)
-include $(LOCAL_PATH)/fetcher.mk
+#include $(CLEAR_VARS)
+#include $(LOCAL_PATH)/fetcher.mk
 
-include $(CLEAR_VARS)
-include $(LOCAL_PATH)/host_package.mk
+#include $(CLEAR_VARS)
+#include $(LOCAL_PATH)/host_package.mk
 
 endif
 
