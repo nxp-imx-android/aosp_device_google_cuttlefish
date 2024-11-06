@@ -414,7 +414,6 @@ endif
 # KeyMint HAL
 #
 PRODUCT_PACKAGES += \
-	com.android.hardware.keymint.rust_cf_remote \
 	com.android.hardware.keymint.rust_nonsecure \
 
 # Indicate that KeyMint includes support for the ATTEST_KEY key purpose.

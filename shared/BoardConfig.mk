@@ -349,7 +349,7 @@ BOARD_KERNEL_CMDLINE += firmware_class.path=/vendor/etc/
 BOARD_KERNEL_CMDLINE += loop.max_part=7
 BOARD_KERNEL_CMDLINE += init=/init
 
-BOARD_KERNEL_CMDLINE += androidboot.boot_device=51712
+BOARD_KERNEL_CMDLINE += androidboot.boot_device=2000e00.virtio
 BOARD_KERNEL_CMDLINE += androidboot.fstab_name=fstab androidboot.fstab_suffix=trout
 
 # Enable KUnit for userdebug and eng builds
